@@ -71,6 +71,14 @@ io.on('connection', (socket) => {
       console.error('Error saving message:', error);
     }
   });
+
+  socket.on('typing', (data) => {
+    socket.to(data.room).emit('user_typing', data.sender);
+  });
+
+  socket.on('stop_typing', (data) => {
+    socket.to(data.room).emit('user_stopped_typing');
+  });
   
   socket.on('disconnect', () => {
     console.log('User disconnected:', socket.id);

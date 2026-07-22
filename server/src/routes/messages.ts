@@ -10,7 +10,7 @@ router.get('/:room', protect, async (req: Request, res: Response) => {
     const { room } = req.params;
     
     // Fetch last 50 messages for the room
-    const messages = await Message.find({ room })
+    const messages = await (Message as any).find({ room })
       .sort({ createdAt: 1 })
       .limit(50)
       .lean();

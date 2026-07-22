@@ -65,3 +65,89 @@ export const generateChatResponse = async (userMessage: string, userContext: any
     return "I'm having trouble connecting to my brain right now. Please try again later!";
   }
 };
+export const generateDraftRequest = async (senderName: string, senderSkills: string[], receiverName: string, receiverSkills: string[]) => {
+  if (!process.env.GEMINI_API_KEY) {
+    return `Hi ${receiverName}, I saw you know ${receiverSkills.join(', ')}. I can teach you ${senderSkills.join(', ')}. Would you be open to a skill swap?`;
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `Write a short, friendly, and professional direct message (max 3 sentences) for a skill-swapping platform.
+    The sender (${senderName}) wants to learn: ${receiverSkills.join(', ')}.
+    The sender can teach: ${senderSkills.join(', ')}.
+    The message is directed to ${receiverName}.
+    Make it sound natural, enthusiastic, and highly likely to get a positive response.
+    Do not include placeholders like [Your Name], just use the provided names.`;
+    
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (error) {
+    console.error("AI Draft Error:", error);
+    return `Hi ${receiverName}, I'm interested in swapping skills! I can teach ${senderSkills.join(', ')} if you can help me with ${receiverSkills.join(', ')}.`;
+  }
+};
+
+export const optimizeProfileBio = async (currentBio: string, skillsOffered: string[], skillsWanted: string[]) => {
+  if (!process.env.GEMINI_API_KEY) {
+    return currentBio + " (Optimized by AI: Highly motivated learner and mentor.)";
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `You are a professional career coach and copywriter.
+    Rewrite the following user bio for a skill-swapping platform.
+    Current Bio: "${currentBio}"
+    Skills they can teach: ${skillsOffered.join(', ')}
+    Skills they want to learn: ${skillsWanted.join(', ')}
+    Make the new bio sound highly professional, engaging, and attractive to potential mentors or mentees.
+    Keep it concise (maximum 3 sentences). Do not use hashtags.
+    Respond ONLY with the rewritten bio.`;
+    
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (error) {
+    console.error("AI Bio Optimize Error:", error);
+    return currentBio;
+  }
+};
+
+export const generateTrendingSkills = async () => {
+  if (!process.env.GEMINI_API_KEY) {
+    return ["Generative AI", "React Server Components", "Figma Variables", "System Design", "Rust"];
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `As an expert in the tech industry, list the top 5 most trending, highly-sought-after tech skills for the current year.
+    Provide ONLY the 5 skill names separated by commas. No numbers, no bullet points, no extra text.
+    Example: Rust, Web3, React, Generative AI, Go`;
+    
+    const result = await model.generateContent(prompt);
+    const text = result.response.text().trim();
+    return text.split(',').map(s => s.trim()).filter(Boolean);
+  } catch (error) {
+    console.error("AI Trending Skills Error:", error);
+    return ["Generative AI", "React Server Components", "Figma Variables", "System Design", "Rust"];
+  }
+};
+
+export const generateRatingSummary = async (reviews: string[]) => {
+  if (!process.env.GEMINI_API_KEY || reviews.length === 0) {
+    return "Consistently praised for clear communication and effective teaching methods.";
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const prompt = `You are an AI analyzing feedback. Summarize the following user reviews into one concise, positive, and highly professional sentence that highlights their strengths as a mentor.
+    Reviews:
+    ${reviews.map(r => "- " + r).join('\n')}
+    
+    Provide ONLY the summary sentence.`;
+    
+    const result = await model.generateContent(prompt);
+    return result.response.text().trim();
+  } catch (error) {
+    console.error("AI Rating Summary Error:", error);
+    return "Consistently praised for clear communication and effective teaching methods.";
+  }
+};

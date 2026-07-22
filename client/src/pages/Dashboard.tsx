@@ -1,19 +1,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
-import { Sparkles, TrendingUp, Award, Clock, Target, CheckCircle2, Zap, ArrowRight, Bell, ChevronRight, Activity } from 'lucide-react';
+import { Sparkles, TrendingUp, Clock, Target, CheckCircle2, Zap, ArrowRight, Bell, ChevronRight, Activity } from 'lucide-react';
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 import { Link } from 'react-router-dom';
 
-const activityData = [
-  { day: 'Mon', xp: 120 },
-  { day: 'Tue', xp: 300 },
-  { day: 'Wed', xp: 200 },
-  { day: 'Thu', xp: 450 },
-  { day: 'Fri', xp: 380 },
-  { day: 'Sat', xp: 600 },
-  { day: 'Sun', xp: 800 },
-];
+
 export default function Dashboard() {
   const { user } = useAuth();
   const [pendingSwaps, setPendingSwaps] = useState<any[]>([]);
@@ -107,7 +99,7 @@ export default function Dashboard() {
           <motion.h1 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-4xl md:text-5xl font-display font-semibold text-charcoal mb-3"
+            className="text-4xl md:text-5xl font-display font-semibold text-primary mb-3"
           >
             Welcome back, {user?.name?.split(' ')[0] || 'Alex'}
           </motion.h1>
@@ -115,7 +107,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-charcoal/60 text-lg"
+            className="text-secondary text-lg"
           >
             You are in the top 5% of mentors this week. Keep it up!
           </motion.p>
@@ -124,14 +116,14 @@ export default function Dashboard() {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
-          className="flex items-center gap-4 bg-background border border-surface p-2 pr-6 rounded-full shadow-sm"
+          className="flex items-center gap-4 bg-surface border border-border p-2 pr-6 rounded-full shadow-sm"
         >
           <div className="w-12 h-12 bg-primary rounded-full flex items-center justify-center text-background">
             <Zap size={20} className="fill-current" />
           </div>
           <div>
-            <div className="text-xs font-bold text-charcoal/50 uppercase tracking-widest">Current Level</div>
-            <div className="font-semibold text-charcoal flex items-baseline gap-1">Level 14 <span className="text-xs text-primary">Master</span></div>
+            <div className="text-xs font-bold text-secondary uppercase tracking-widest">Current Level</div>
+            <div className="font-semibold text-primary flex items-baseline gap-1">Level {currentLevel} <span className="text-xs text-secondary">Master</span></div>
           </div>
         </motion.div>
       </div>
@@ -154,13 +146,13 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 + (i * 0.05) }}
-                className="bg-background border border-surface rounded-3xl p-5 hover:shadow-premium transition-shadow"
+                className="bg-surface border border-border rounded-3xl p-5 hover:shadow-premium transition-shadow"
               >
-                <div className="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-charcoal mb-4">
+                <div className="w-10 h-10 rounded-full bg-surface-hover flex items-center justify-center text-primary mb-4">
                   {stat.icon}
                 </div>
-                <div className="text-3xl font-display font-semibold text-charcoal mb-1">{stat.value}</div>
-                <div className="text-xs font-medium text-charcoal/50 uppercase tracking-wider">{stat.label}</div>
+                <div className="text-3xl font-display font-semibold text-primary mb-1">{stat.value}</div>
+                <div className="text-xs font-medium text-secondary uppercase tracking-wider">{stat.label}</div>
               </motion.div>
             ))}
           </div>
@@ -170,16 +162,16 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="matte-surface rounded-[2.5rem] p-8 border border-highlight/10"
+            className="bg-surface rounded-[2.5rem] p-8 border border-border"
           >
             <div className="flex justify-between items-center mb-8">
               <div>
-                <h3 className="text-xl font-display font-semibold text-charcoal">Weekly Activity</h3>
-                <p className="text-sm text-charcoal/60">XP gained over the last 7 days</p>
+                <h3 className="text-xl font-display font-semibold text-primary">Weekly Activity</h3>
+                <p className="text-sm text-secondary">XP gained over the last 7 days</p>
               </div>
               <div className="flex gap-2">
-                <span className="px-3 py-1 bg-background rounded-full text-xs font-semibold text-charcoal border border-surface">XP</span>
-                <span className="px-3 py-1 bg-transparent rounded-full text-xs font-semibold text-charcoal/40">Hours</span>
+                <span className="px-3 py-1 bg-surface-hover rounded-full text-xs font-semibold text-primary border border-border">XP</span>
+                <span className="px-3 py-1 bg-transparent rounded-full text-xs font-semibold text-secondary">Hours</span>
               </div>
             </div>
             
@@ -188,17 +180,17 @@ export default function Dashboard() {
                 <AreaChart data={activityData}>
                   <defs>
                     <linearGradient id="colorXp" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#275D4D" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#275D4D" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#FAFAFA" stopOpacity={0.1}/>
+                      <stop offset="95%" stopColor="#FAFAFA" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#1D1D1F', opacity: 0.5 }} dy={10} />
+                  <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#A1A1AA' }} dy={10} />
                   <YAxis hide />
                   <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.1)' }}
-                    cursor={{ stroke: '#E0DDD6', strokeWidth: 1, strokeDasharray: '4 4' }}
+                    contentStyle={{ backgroundColor: '#18181B', borderRadius: '12px', border: '1px solid #27272A', boxShadow: '0 10px 40px -10px rgba(0,0,0,0.5)', color: '#FAFAFA' }}
+                    cursor={{ stroke: '#27272A', strokeWidth: 1, strokeDasharray: '4 4' }}
                   />
-                  <Area type="monotone" dataKey="xp" stroke="#275D4D" strokeWidth={3} fillOpacity={1} fill="url(#colorXp)" />
+                  <Area type="monotone" dataKey="xp" stroke="#FAFAFA" strokeWidth={2} fillOpacity={1} fill="url(#colorXp)" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
@@ -209,29 +201,29 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-background rounded-[2.5rem] p-8 shadow-sm border border-surface"
+            className="bg-surface rounded-[2.5rem] p-8 shadow-sm border border-border"
           >
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-display font-semibold text-charcoal">Action Required</h3>
-              <Link to="/swaps" className="text-primary text-sm font-semibold flex items-center gap-1 hover:underline">View all <ChevronRight size={16} /></Link>
+              <h3 className="text-xl font-display font-semibold text-primary">Action Required</h3>
+              <Link to="/swaps" className="text-highlight text-sm font-semibold flex items-center gap-1 hover:underline">View all <ChevronRight size={16} /></Link>
             </div>
 
             <div className="space-y-4">
               {pendingSwaps.length === 0 ? (
-                <div className="text-charcoal/60 text-sm">No pending actions. You're all caught up!</div>
+                <div className="text-secondary text-sm">No pending actions. You're all caught up!</div>
               ) : (
-                pendingSwaps.map((req, i) => (
-                  <div key={req._id} className="flex items-center justify-between p-4 bg-surface rounded-2xl hover:bg-surface-hover transition-colors cursor-pointer">
+                pendingSwaps.map((req) => (
+                  <div key={req._id} className="flex items-center justify-between p-4 bg-background border border-border rounded-2xl hover:bg-surface-hover transition-colors cursor-pointer">
                     <div className="flex items-center gap-4">
                       <img src={req.requester.avatar || `https://ui-avatars.com/api/?name=${req.requester.name}&background=random`} alt={req.requester.name} className="w-12 h-12 rounded-full" />
                       <div>
-                        <h4 className="font-semibold text-charcoal">{req.requester.name}</h4>
-                        <p className="text-sm text-charcoal/60">Wants to swap for {req.skillWanted}</p>
+                        <h4 className="font-semibold text-primary">{req.requester.name}</h4>
+                        <p className="text-sm text-secondary">Wants to swap for {req.skillWanted}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
-                      <span className="text-xs text-charcoal/40 hidden sm:block">{new Date(req.createdAt).toLocaleDateString()}</span>
-                      <Link to="/swaps" className="bg-charcoal text-background px-4 py-2 rounded-xl text-sm font-medium hover:bg-primary transition-colors">Review</Link>
+                      <span className="text-xs text-secondary hidden sm:block">{new Date(req.createdAt).toLocaleDateString()}</span>
+                      <Link to="/swaps" className="bg-primary text-background px-4 py-2 rounded-xl text-sm font-medium hover:bg-highlight transition-colors">Review</Link>
                     </div>
                   </div>
                 ))
@@ -249,15 +241,15 @@ export default function Dashboard() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-charcoal text-background rounded-[2.5rem] p-8 shadow-premium relative overflow-hidden group"
+            className="bg-surface text-primary rounded-[2.5rem] p-8 shadow-premium border border-border relative overflow-hidden group"
           >
-            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-[80px] -translate-y-1/2 translate-x-1/2"></div>
             <h3 className="font-display font-semibold text-xl mb-6 relative z-10">XP Progress</h3>
             
             <div className="flex justify-center mb-6 relative z-10">
               <div className="relative w-40 h-40 flex items-center justify-center">
                 <svg className="w-full h-full transform -rotate-90">
-                  <circle cx="80" cy="80" r="70" className="stroke-surface/20" strokeWidth="12" fill="none" />
+                  <circle cx="80" cy="80" r="70" className="stroke-surface-hover" strokeWidth="12" fill="none" />
                   <circle 
                     cx="80" cy="80" r="70" 
                     className="stroke-primary" strokeWidth="12" fill="none" 
@@ -269,18 +261,18 @@ export default function Dashboard() {
                 </svg>
                 <div className="absolute text-center">
                   <div className="text-3xl font-display font-bold">{currentXp.toLocaleString()}</div>
-                  <div className="text-xs font-medium text-background/60 uppercase tracking-widest">XP</div>
+                  <div className="text-xs font-medium text-secondary uppercase tracking-widest">XP</div>
                 </div>
               </div>
             </div>
 
             <div className="space-y-3 relative z-10">
               <div className="flex justify-between text-sm">
-                <span className="text-background/60">Success Rate</span>
-                <span className="font-semibold text-highlight flex items-center gap-1"><TrendingUp size={14} /> {totalCompleted > 0 ? '100%' : 'N/A'}</span>
+                <span className="text-secondary">Success Rate</span>
+                <span className="font-semibold text-primary flex items-center gap-1"><TrendingUp size={14} /> {totalCompleted > 0 ? '100%' : 'N/A'}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span className="text-background/60">Next Level</span>
+                <span className="text-secondary">Next Level</span>
                 <span className="font-semibold">{nextLevelXp.toLocaleString()} XP</span>
               </div>
             </div>
@@ -291,7 +283,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="matte-surface rounded-[2.5rem] p-8 border border-highlight/20"
+            className="bg-surface rounded-[2.5rem] p-8 border border-border"
           >
             <div className="flex items-center gap-2 text-highlight font-semibold mb-6">
               <Sparkles size={20} /> AI Suggestions
@@ -300,17 +292,17 @@ export default function Dashboard() {
             <div className="space-y-4">
               {user?.skillsWanted && user.skillsWanted.length > 0 ? (
                 user.skillsWanted.slice(0, 2).map((skill: string, i: number) => (
-                  <div key={i} className="bg-background/50 border border-surface p-4 rounded-2xl relative overflow-hidden group hover:border-primary/50 transition-colors cursor-pointer">
-                    <h4 className="font-semibold text-charcoal text-sm mb-1">Focus on {skill}</h4>
-                    <p className="text-xs text-charcoal/60">We found several users offering {skill}. Finding a swap now could boost your level by 25%.</p>
-                    <ArrowRight size={16} className="absolute bottom-4 right-4 text-primary opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all" />
+                  <div key={i} className="bg-background/50 border border-border p-4 rounded-2xl relative overflow-hidden group hover:border-surface-hover transition-colors cursor-pointer">
+                    <h4 className="font-semibold text-primary text-sm mb-1">Focus on {skill}</h4>
+                    <p className="text-xs text-secondary">We found several users offering {skill}. Finding a swap now could boost your level by 25%.</p>
+                    <ArrowRight size={16} className="absolute bottom-4 right-4 text-highlight opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all" />
                   </div>
                 ))
               ) : (
-                <div className="bg-background/50 border border-surface p-4 rounded-2xl relative overflow-hidden group hover:border-primary/50 transition-colors cursor-pointer">
-                  <h4 className="font-semibold text-charcoal text-sm mb-1">Update your Profile</h4>
-                  <p className="text-xs text-charcoal/60">Add skills you want to learn to get personalized AI roadmaps and better matches.</p>
-                  <ArrowRight size={16} className="absolute bottom-4 right-4 text-primary opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all" />
+                <div className="bg-background/50 border border-border p-4 rounded-2xl relative overflow-hidden group hover:border-surface-hover transition-colors cursor-pointer">
+                  <h4 className="font-semibold text-primary text-sm mb-1">Update your Profile</h4>
+                  <p className="text-xs text-secondary">Add skills you want to learn to get personalized AI roadmaps and better matches.</p>
+                  <ArrowRight size={16} className="absolute bottom-4 right-4 text-highlight opacity-0 group-hover:opacity-100 translate-x-2 group-hover:translate-x-0 transition-all" />
                 </div>
               )}
             </div>
@@ -321,24 +313,24 @@ export default function Dashboard() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-background rounded-[2.5rem] p-8 shadow-sm border border-surface"
+            className="bg-surface rounded-[2.5rem] p-8 shadow-sm border border-border"
           >
-            <div className="flex items-center gap-2 font-display font-semibold text-charcoal mb-6">
-              <Bell size={20} className="text-charcoal/40" /> Recent Activity
+            <div className="flex items-center gap-2 font-display font-semibold text-primary mb-6">
+              <Bell size={20} className="text-secondary" /> Recent Activity
             </div>
             <div className="space-y-5">
               {recentActivity.length > 0 ? (
                 recentActivity.map((act) => (
                   <div key={act.id} className="flex gap-4">
-                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${act.color}`}></div>
+                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${act.color.replace('bg-charcoal/20', 'bg-border')}`}></div>
                     <div>
-                      <p className="text-sm text-charcoal">{act.text}</p>
-                      <p className="text-xs text-charcoal/40 mt-1">{act.time}</p>
+                      <p className="text-sm text-primary">{act.text}</p>
+                      <p className="text-xs text-secondary mt-1">{act.time}</p>
                     </div>
                   </div>
                 ))
               ) : (
-                <div className="text-sm text-charcoal/50 text-center py-4">No recent activity yet. Start exploring to find swaps!</div>
+                <div className="text-sm text-secondary text-center py-4">No recent activity yet. Start exploring to find swaps!</div>
               )}
             </div>
           </motion.div>

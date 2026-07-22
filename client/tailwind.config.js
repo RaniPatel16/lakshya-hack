@@ -7,27 +7,29 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#F8F7F4', // Warm Ivory
-        surface: '#EAE7E1', // Stone
-        primary: '#275D4D', // Forest Green
-        accent: '#D97745', // Burnt Orange
-        highlight: '#D6B36A', // Soft Gold
-        charcoal: '#1D1D1F', // Charcoal Text
-        'surface-hover': '#E0DDD6',
+        background: '#F8FAFC', // Slate 50 (Very light gray-white for contrast)
+        surface: '#FFFFFF', // Pure white
+        primary: '#059669', // Emerald 600 (Rich Green for branding, headings, buttons)
+        secondary: '#64748B', // Slate 500 (Muted text)
+        accent: '#047857', // Emerald 700
+        highlight: '#34D399', // Emerald 400
+        charcoal: '#0F172A', // Slate 900 (Dark text)
+        'surface-hover': '#F1F5F9', // Slate 100
+        border: '#E2E8F0', // Slate 200
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-        display: ['Poppins', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        display: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        'soft': '0 4px 20px -2px rgba(29, 29, 31, 0.05)',
-        'premium': '0 10px 40px -10px rgba(29, 29, 31, 0.08)',
-        'float': '0 20px 40px -15px rgba(29, 29, 31, 0.12)',
+        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+        'premium': '0 10px 40px -10px rgba(0, 0, 0, 0.08)',
+        'float': '0 20px 40px -15px rgba(0, 0, 0, 0.1)',
       },
       borderRadius: {
-        'xl': '1rem',
-        '2xl': '1.5rem',
-        '3xl': '2rem',
+        'xl': '12px',
+        '2xl': '16px',
+        '3xl': '24px',
       }
     },
   },

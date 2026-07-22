@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { generateSkillMatchScore, generateCareerRoadmap, generateChatResponse } from '../services/aiService';
+import { generateSkillMatchScore, generateCareerRoadmap, generateChatResponse, generateDraftRequest, optimizeProfileBio, generateTrendingSkills, generateRatingSummary } from '../services/aiService';
 
 export const getMatchScore = async (req: Request, res: Response) => {
   try {
@@ -43,5 +43,59 @@ export const chat = async (req: Request, res: Response) => {
     res.status(200).json({ reply });
   } catch (error) {
     res.status(500).json({ message: 'Server error generating chat response' });
+  }
+};
+
+export const draftSwapRequest = async (req: Request, res: Response) => {
+  try {
+    const { senderName, senderSkills, receiverName, receiverSkills } = req.body;
+    
+    if (!senderName || !receiverName) {
+      return res.status(400).json({ message: 'Sender and receiver names are required' });
+    }
+
+    const draft = await generateDraftRequest(senderName, senderSkills || [], receiverName, receiverSkills || []);
+    res.status(200).json({ draft });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error generating draft' });
+  }
+};
+
+export const optimizeProfile = async (req: Request, res: Response) => {
+  try {
+    const { bio, skillsOffered, skillsWanted } = req.body;
+    
+    if (bio === undefined) {
+      return res.status(400).json({ message: 'Bio is required' });
+    }
+
+    const optimizedBio = await optimizeProfileBio(bio, skillsOffered || [], skillsWanted || []);
+    res.status(200).json({ optimizedBio });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error optimizing profile' });
+  }
+};
+
+export const getTrendingSkills = async (req: Request, res: Response) => {
+  try {
+    const skills = await generateTrendingSkills();
+    res.status(200).json({ skills });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error fetching trending skills' });
+  }
+};
+
+export const getRatingSummary = async (req: Request, res: Response) => {
+  try {
+    const { reviews } = req.body;
+    
+    if (!reviews || !Array.isArray(reviews)) {
+      return res.status(400).json({ message: 'Reviews array is required' });
+    }
+
+    const summary = await generateRatingSummary(reviews);
+    res.status(200).json({ summary });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error generating rating summary' });
   }
 };

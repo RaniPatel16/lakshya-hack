@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Send, Paperclip, Smile, Mic, Video, Calendar as CalendarIcon, Info, Phone, MoreVertical, FileText, Sparkles, Check, Clock, X } from 'lucide-react';
+import { Send, Paperclip, Smile, Mic, Video, Calendar as CalendarIcon, Info, Phone, MoreVertical, Sparkles, Check, X } from 'lucide-react';
 import { useSocket } from '../context/SocketContext';
 import { useAuth } from '../context/AuthContext';
 
@@ -28,6 +28,8 @@ export default function Messages() {
   const [activeRoom, setActiveRoom] = useState('room_sarah');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [typingUser, setTypingUser] = useState<string | null>(null);
+  const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   const { socket } = useSocket();
@@ -84,12 +86,20 @@ export default function Messages() {
             isMe: false
           }];
         });
+        setTypingUser(null);
       };
 
+      const handleTyping = (senderName: string) => setTypingUser(senderName);
+      const handleStopTyping = () => setTypingUser(null);
+
       socket.on('receive_message', handleReceiveMessage);
+      socket.on('user_typing', handleTyping);
+      socket.on('user_stopped_typing', handleStopTyping);
 
       return () => {
         socket.off('receive_message', handleReceiveMessage);
+        socket.off('user_typing', handleTyping);
+        socket.off('user_stopped_typing', handleStopTyping);
       };
     }
   }, [socket, activeRoom]);
@@ -137,6 +147,7 @@ export default function Messages() {
 
     if (socket) {
       socket.emit('send_message', newMsg);
+      socket.emit('stop_typing', { room: activeRoom });
     }
 
     // Optimistically add to UI
@@ -144,38 +155,52 @@ export default function Messages() {
     setMessage('');
   };
 
+  const handleTypingChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setMessage(e.target.value);
+    
+    if (socket && user) {
+      socket.emit('typing', { room: activeRoom, sender: user.name });
+      
+      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+      
+      typingTimeoutRef.current = setTimeout(() => {
+        socket.emit('stop_typing', { room: activeRoom });
+      }, 2000);
+    }
+  };
+
   return (
-    <div className="flex h-[calc(100vh-14rem)] border border-surface rounded-[2rem] overflow-hidden shadow-sm bg-background mt-8 relative z-0">
+    <div className="flex h-[calc(100vh-14rem)] border border-border rounded-[2rem] overflow-hidden shadow-sm bg-background mt-8 relative z-0">
       
       {/* Sidebar: Chat List */}
-      <div className="w-80 border-r border-surface bg-background flex flex-col flex-shrink-0">
-        <div className="p-4 border-b border-surface">
+      <div className="w-80 border-r border-border bg-background flex flex-col flex-shrink-0">
+        <div className="p-4 border-b border-border">
           <input 
             type="text" 
             placeholder="Search messages..." 
-            className="w-full bg-surface border border-surface rounded-xl px-4 py-2 text-sm outline-none focus:border-primary transition-colors"
+            className="w-full bg-surface border border-border rounded-xl px-4 py-2 text-sm outline-none focus:border-primary transition-colors text-primary placeholder:text-secondary"
           />
         </div>
         <div className="flex-1 overflow-y-auto">
           {contacts.length === 0 ? (
-            <div className="p-6 text-center text-charcoal/50 text-sm">No accepted swaps to chat with yet.</div>
+            <div className="p-6 text-center text-secondary text-sm">No accepted swaps to chat with yet.</div>
           ) : (
-            contacts.map((chat, i) => (
+            contacts.map((chat) => (
               <div 
                 key={chat.id} 
                 onClick={() => setActiveRoom(`room_${chat.id}`)}
-                className={`flex items-center gap-3 p-4 border-b border-surface/50 cursor-pointer transition-colors ${activeRoom === `room_${chat.id}` ? 'bg-surface/50 border-l-4 border-l-primary' : 'hover:bg-surface/30 border-l-4 border-l-transparent'}`}
+                className={`flex items-center gap-3 p-4 border-b border-border/50 cursor-pointer transition-colors ${activeRoom === `room_${chat.id}` ? 'bg-surface/50 border-l-4 border-l-primary' : 'hover:bg-surface/30 border-l-4 border-l-transparent'}`}
               >
                 <div className="relative">
-                  <img src={chat.avatar} alt={chat.name} className="w-12 h-12 rounded-full border border-surface object-cover" />
+                  <img src={chat.avatar} alt={chat.name} className="w-12 h-12 rounded-full border border-border object-cover" />
                   {chat.unread && <span className="absolute top-0 right-0 w-3 h-3 bg-primary border-2 border-background rounded-full"></span>}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex justify-between items-baseline mb-1">
-                    <h4 className="font-semibold text-charcoal text-sm truncate">{chat.name}</h4>
-                    <span className="text-xs text-charcoal/50">{chat.time}</span>
+                    <h4 className="font-semibold text-primary text-sm truncate">{chat.name}</h4>
+                    <span className="text-xs text-secondary">{chat.time}</span>
                   </div>
-                  <p className={`text-xs truncate ${chat.unread ? 'font-semibold text-charcoal' : 'text-charcoal/60'}`}>{chat.msg}</p>
+                  <p className={`text-xs truncate ${chat.unread ? 'font-semibold text-primary' : 'text-secondary'}`}>{chat.msg}</p>
                 </div>
               </div>
             ))
@@ -187,68 +212,84 @@ export default function Messages() {
       <div className="flex-1 flex flex-col bg-background/50 relative">
         
         {/* Chat Header */}
-        <div className="h-16 border-b border-surface bg-background flex items-center justify-between px-6 flex-shrink-0">
+        <div className="h-16 border-b border-border bg-background flex items-center justify-between px-6 flex-shrink-0">
           <div className="flex items-center gap-3">
-            <h3 className="font-semibold text-charcoal text-lg">
+            <h3 className="font-semibold text-primary text-lg">
               {contacts.find(c => `room_${c.id}` === activeRoom)?.name || 'Select a chat'}
             </h3>
           </div>
-          <div className="flex items-center gap-2 text-charcoal/50">
-            <button className="p-2 hover:bg-surface rounded-full transition-colors tooltip-trigger"><Phone size={18} /></button>
-            <button className="p-2 hover:bg-surface rounded-full transition-colors tooltip-trigger"><Video size={18} /></button>
-            <button onClick={() => setShowBookingModal(true)} className="p-2 hover:bg-surface text-primary rounded-full transition-colors tooltip-trigger"><CalendarIcon size={18} /></button>
-            <button className="p-2 hover:bg-surface rounded-full transition-colors tooltip-trigger"><Info size={18} /></button>
-            <button className="p-2 hover:bg-surface rounded-full transition-colors tooltip-trigger"><MoreVertical size={18} /></button>
+          <div className="flex items-center gap-2 text-secondary">
+            <button className="p-2 hover:bg-surface rounded-full transition-colors tooltip-trigger border border-transparent hover:border-border"><Phone size={18} /></button>
+            <button className="p-2 hover:bg-surface rounded-full transition-colors tooltip-trigger border border-transparent hover:border-border"><Video size={18} /></button>
+            <button onClick={() => setShowBookingModal(true)} className="p-2 hover:bg-surface text-highlight rounded-full transition-colors tooltip-trigger border border-transparent hover:border-highlight/20"><CalendarIcon size={18} /></button>
+            <button className="p-2 hover:bg-surface rounded-full transition-colors tooltip-trigger border border-transparent hover:border-border"><Info size={18} /></button>
+            <button className="p-2 hover:bg-surface rounded-full transition-colors tooltip-trigger border border-transparent hover:border-border"><MoreVertical size={18} /></button>
           </div>
         </div>
 
         {/* Chat Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          <div className="text-center text-xs text-charcoal/40 font-medium my-4">Today</div>
+          <div className="text-center text-xs text-secondary font-medium my-4">Today</div>
           
           {chatMessages.map(msg => (
             <div key={msg.id} className={`flex items-start gap-4 ${msg.isMe ? 'flex-row-reverse' : ''}`}>
               <img src={msg.isMe ? "https://i.pravatar.cc/150?img=11" : "https://i.pravatar.cc/150?img=47"} className="w-10 h-10 rounded-full object-cover" />
               <div className={`flex flex-col ${msg.isMe ? 'items-end' : 'items-start'}`}>
                 <div className={`flex items-baseline gap-2 mb-1 ${msg.isMe ? 'flex-row-reverse' : ''}`}>
-                  <span className="font-semibold text-charcoal">{msg.sender}</span>
-                  <span className="text-xs text-charcoal/40">{msg.time}</span>
+                  <span className="font-semibold text-primary">{msg.sender}</span>
+                  <span className="text-xs text-secondary">{msg.time}</span>
                 </div>
-                <div className={`p-3 max-w-md ${msg.isMe ? 'bg-primary text-background rounded-2xl rounded-tr-none' : 'bg-surface text-charcoal rounded-2xl rounded-tl-none'}`}>
+                <div className={`p-3 max-w-md ${msg.isMe ? 'bg-primary text-background rounded-2xl rounded-tr-none shadow-sm' : 'bg-surface border border-border text-primary rounded-2xl rounded-tl-none shadow-sm'}`}>
                   {msg.text}
                 </div>
               </div>
             </div>
           ))}
+          
+          {typingUser && (
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-surface animate-pulse border border-border" />
+              <div className="flex flex-col items-start">
+                <div className="flex items-baseline gap-2 mb-1">
+                  <span className="font-semibold text-secondary">{typingUser}</span>
+                </div>
+                <div className="p-4 bg-surface border border-border text-primary rounded-2xl rounded-tl-none flex gap-1 items-center h-10">
+                  <div className="w-1.5 h-1.5 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-1.5 h-1.5 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-1.5 h-1.5 bg-secondary rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                </div>
+              </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}
-        <div className="p-4 bg-background border-t border-surface">
-          <form onSubmit={e => { e.preventDefault(); handleSend(); }} className="bg-surface rounded-2xl border border-surface-hover p-2 flex flex-col transition-colors focus-within:border-primary/50 focus-within:bg-background">
+        <div className="p-4 bg-background border-t border-border flex-shrink-0">
+          <form onSubmit={e => { e.preventDefault(); handleSend(); }} className="bg-surface rounded-2xl border border-border p-2 flex flex-col transition-colors focus-within:border-primary/50 focus-within:bg-background shadow-sm">
             <input 
               value={message}
-              onChange={e => setMessage(e.target.value)}
+              onChange={handleTypingChange}
               placeholder="Type a message..."
-              className="w-full bg-transparent px-3 py-2 text-sm outline-none text-charcoal"
+              className="w-full bg-transparent px-3 py-2 text-sm outline-none text-primary placeholder:text-secondary"
             />
-            <div className="flex justify-between items-center px-2 pt-2 border-t border-surface/50">
-              <div className="flex items-center gap-1 text-charcoal/50">
-                <button className="p-1.5 hover:bg-surface-hover rounded-lg transition-colors"><Paperclip size={18} /></button>
-                <button className="p-1.5 hover:bg-surface-hover rounded-lg transition-colors"><Mic size={18} /></button>
-                <button className="p-1.5 hover:bg-surface-hover rounded-lg transition-colors"><Smile size={18} /></button>
+            <div className="flex justify-between items-center px-2 pt-2 border-t border-border/50 mt-1">
+              <div className="flex items-center gap-1 text-secondary">
+                <button className="p-1.5 hover:bg-surface-hover hover:text-primary rounded-lg transition-colors"><Paperclip size={18} /></button>
+                <button className="p-1.5 hover:bg-surface-hover hover:text-primary rounded-lg transition-colors"><Mic size={18} /></button>
+                <button className="p-1.5 hover:bg-surface-hover hover:text-primary rounded-lg transition-colors"><Smile size={18} /></button>
               </div>
               <button 
                 type="submit"
                 disabled={!message.trim()}
-                className="bg-primary text-background p-2 rounded-xl hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:hover:bg-primary"
+                className="bg-primary text-background p-2 rounded-xl hover:bg-highlight transition-colors disabled:opacity-50"
               >
                 <Send size={16} className="ml-0.5" />
               </button>
             </div>
           </form>
           <div className="text-center mt-2">
-            <span className="text-[10px] text-charcoal/40 font-medium">Press <kbd className="font-mono bg-surface px-1 py-0.5 rounded">Enter</kbd> to send, <kbd className="font-mono bg-surface px-1 py-0.5 rounded">Shift + Enter</kbd> for new line</span>
+            <span className="text-[10px] text-secondary font-medium">Press <kbd className="font-mono bg-surface border border-border px-1 py-0.5 rounded">Enter</kbd> to send, <kbd className="font-mono bg-surface border border-border px-1 py-0.5 rounded">Shift + Enter</kbd> for new line</span>
           </div>
         </div>
 
@@ -258,28 +299,28 @@ export default function Messages() {
             <motion.div 
               initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              className="bg-background border border-surface rounded-3xl p-8 shadow-premium max-w-md w-full relative"
+              className="bg-surface border border-border rounded-3xl p-8 shadow-premium max-w-md w-full relative"
             >
-              <button onClick={() => setShowBookingModal(false)} className="absolute top-6 right-6 text-charcoal/40 hover:text-charcoal"><X size={20}/></button>
-              <h3 className="text-2xl font-semibold text-charcoal mb-6">Schedule Session</h3>
+              <button onClick={() => setShowBookingModal(false)} className="absolute top-6 right-6 text-secondary hover:text-primary"><X size={20}/></button>
+              <h3 className="text-2xl font-semibold text-primary mb-6">Schedule Session</h3>
               
               <div className="bg-highlight/10 border border-highlight/20 p-4 rounded-2xl mb-6">
                 <div className="flex items-center gap-2 text-highlight font-semibold text-sm mb-2">
                   <Sparkles size={16} /> AI Suggested Time
                 </div>
-                <p className="text-sm text-charcoal/80 mb-3">Based on both of your availability calendars, you share a free slot tomorrow evening.</p>
-                <button className="w-full bg-highlight text-background py-2 rounded-xl text-sm font-medium hover:bg-highlight/90 transition-colors flex items-center justify-center gap-2">
+                <p className="text-sm text-secondary mb-3">Based on both of your availability calendars, you share a free slot tomorrow evening.</p>
+                <button className="w-full bg-highlight text-background py-2 rounded-xl text-sm font-medium hover:bg-highlight/90 transition-colors flex items-center justify-center gap-2 shadow-sm">
                   <Check size={16} /> Book Tomorrow, 18:00 PT
                 </button>
               </div>
 
               <div className="flex items-center gap-4 mb-6">
-                <div className="h-px bg-surface flex-1"></div>
-                <span className="text-xs font-semibold text-charcoal/40 uppercase tracking-widest">Or pick manually</span>
-                <div className="h-px bg-surface flex-1"></div>
+                <div className="h-px bg-border flex-1"></div>
+                <span className="text-xs font-semibold text-secondary uppercase tracking-widest">Or pick manually</span>
+                <div className="h-px bg-border flex-1"></div>
               </div>
 
-              <button className="w-full bg-surface text-charcoal py-3 rounded-xl text-sm font-medium hover:bg-surface-hover transition-colors flex items-center justify-center gap-2">
+              <button className="w-full bg-background border border-border text-primary py-3 rounded-xl text-sm font-medium hover:bg-surface-hover transition-colors flex items-center justify-center gap-2">
                 <CalendarIcon size={16} /> Open Full Calendar
               </button>
             </motion.div>

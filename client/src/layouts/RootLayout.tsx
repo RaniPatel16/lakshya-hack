@@ -39,6 +39,9 @@ export default function RootLayout() {
           <Link to="/swaps" className="hover:text-primary transition-colors flex items-center gap-1.5">
             <ArrowRightLeft size={16} /> Swaps
           </Link>
+          <Link to="/roadmap" className="hover:text-primary transition-colors flex items-center gap-1.5">
+            <Compass size={16} /> Roadmap
+          </Link>
           <Link to="/matches" className="hover:text-primary transition-colors flex items-center gap-1.5">
             <Sparkles size={16} /> Matches
           </Link>
