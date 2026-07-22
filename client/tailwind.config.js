@@ -7,29 +7,29 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#F8FAFC', // Slate 50 (Very light gray-white for contrast)
-        surface: '#FFFFFF', // Pure white
-        primary: '#059669', // Emerald 600 (Rich Green for branding, headings, buttons)
-        secondary: '#64748B', // Slate 500 (Muted text)
-        accent: '#047857', // Emerald 700
-        highlight: '#34D399', // Emerald 400
-        charcoal: '#0F172A', // Slate 900 (Dark text)
-        'surface-hover': '#F1F5F9', // Slate 100
-        border: '#E2E8F0', // Slate 200
+        background: '#F8F6F2', // Warm Ivory
+        surface: '#FFFFFF', // White cards
+        primary: '#1F4E46', // Deep Forest Green
+        secondary: '#6B7280', // Secondary Text
+        accent: '#D88C4A', // Burnt Orange
+        highlight: '#E8C547', // Soft Gold
+        charcoal: '#222222', // Primary Text
+        'surface-hover': '#F3F0EA',
+        border: '#E5E0D8',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
         display: ['Inter', 'system-ui', 'sans-serif'],
       },
       boxShadow: {
-        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
-        'premium': '0 10px 40px -10px rgba(0, 0, 0, 0.08)',
-        'float': '0 20px 40px -15px rgba(0, 0, 0, 0.1)',
+        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.03)',
+        'premium': '0 10px 40px -10px rgba(0, 0, 0, 0.05)',
+        'float': '0 20px 40px -15px rgba(0, 0, 0, 0.08)',
       },
       borderRadius: {
         'xl': '12px',
-        '2xl': '16px',
-        '3xl': '24px',
+        '2xl': '18px',
+        '3xl': '20px',
       }
     },
   },

@@ -3,14 +3,7 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --bg-color: #0E0E0E;
-    --text-color: #F4F4F5;
-  }
-  
   html {
-    background-color: var(--bg-color);
-    color: var(--text-color);
     font-family: 'Inter', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -19,20 +12,16 @@
   body {
     margin: 0;
     min-height: 100vh;
-    background-color: var(--bg-color);
+    @apply bg-background text-charcoal;
   }
 }
 
 @layer utilities {
   .matte-glass {
-    background: rgba(21, 21, 21, 0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    @apply bg-surface/80 backdrop-blur-md border border-border;
   }
   
   .matte-surface {
-    background-color: #151515;
-    border: 1px solid #2A2A2A;
+    @apply bg-surface border border-border;
   }
 }
